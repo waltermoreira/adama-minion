@@ -48,20 +48,20 @@ def remote_image_exists(img):
 def task_build():
     """Build minion image"""
 
-    all_files = ['dodo.py', 'Dockerfile', 'deploy.yml',
+    all_files = ['dodo.py', 'Dockerfile',
                  'minion_server.conf', 'worker.conf']
     for d, _, fs in os.walk('handler'):
         for f in fs:
             all_files.append(os.path.join(d, f))
 
     return {
-        'actions': ['docker build -t minion .',
-                    'docker inspect -f "{{ .Id }}" minion > .build'],
+        'actions': ['docker build -t adama/minion .',
+                    'docker inspect -f "{{ .Id }}" adama/minion > .build'],
         'targets': ['.build'],
         'file_dep': all_files,
         'task_dep': ['_check_images'],
         'uptodate': [result_dep('_check_images'),
-                     target_image_exists('minion')],
+                     target_image_exists('adama/minion')],
         'clean': True,
         'verbosity': 2
     }
@@ -71,9 +71,8 @@ def task_push():
     """Push image to docker hub"""
 
     return {
-        'actions': ['docker tag -f minion adama/minion',
-                    'docker push adama/minion',
-                    'docker inspect -f "{{ .Id }}" minion > .push'],
+        'actions': ['docker push adama/minion',
+                    'docker inspect -f "{{ .Id }}" adama/minion > .push'],
         'targets': ['.push'],
         'file_dep': ['.build'],
         'task_dep': ['build'],
